@@ -1,27 +1,29 @@
 #!/usr/bin/python3
-"""init Flask web app"""
+"""Starts a Flask web application"""
+
 from flask import Flask
 app = Flask(__name__)
-app.url_map.strict_slashes = False
 
 
-@app.route('/')
-def hello_framework():
-    """ display Hello HBNB! """
+@app.route('/', strict_slashes=False)
+def hello_holberton():
+    """Returns a string at the root route"""
     return 'Hello HBNB!'
 
 
-@app.route('/hbnb')
-def disp_hbnb():
-    """ display /hbnb! """
+@app.route('/hbnb', strict_slashes=False)
+def hbnb():
+    """Returns a string at the /hbnb route"""
     return 'HBNB'
 
 
-@app.route('/c/<text>')
-def c_is_text(text):
-    """ display /c/<text> """
-    return 'C %s' % text.replace('_', ' ')
+@app.route('/c/<text>', strict_slashes=False)
+def cisfun(text):
+    """Returns a string at the /c/<text> route,
+    expands the <text> variable"""
+    new = text.replace('_', ' ')
+    return 'C %s' % new
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')
