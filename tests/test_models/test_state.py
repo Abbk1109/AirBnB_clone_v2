@@ -1,70 +1,151 @@
 #!/usr/bin/python3
-"""test for state"""
-import unittest
-import os
-from os import getenv
+""" """
+from tests.test_models.test_base_model import test_basemodel
 from models.state import State
+
+import unittest
+from datetime import datetime
+from time import sleep
 from models.base_model import BaseModel
-import pep8
+from unittest.mock import patch
+import pycodestyle
+import models
+from uuid import UUID
 
 
-class TestState(unittest.TestCase):
-    """this will test the State class"""
+class test_state(test_basemodel):
+    """ """
 
-    @classmethod
-    def setUpClass(cls):
-        """set up for test"""
-        cls.state = State()
-        cls.state.name = "CA"
+    def __init__(self, *args, **kwargs):
+        """ """
+        super().__init__(*args, **kwargs)
+        self.name = "State"
+        self.value = State
 
-    @classmethod
-    def teardown(cls):
-        """at the end of the test this will tear it down"""
-        del cls.state
+    def test_name3(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.name), str)
 
-    def tearDown(self):
-        """teardown"""
-        try:
-            os.remove("file.json")
-        except Exception:
-            pass
+    def test_pep8_state(self):
+        """test pep8 style"""
+        pep8style = pycodestyle.StyleGuide(quiet=True)
+        result = pep8style.check_files(['models/state.py'])
+        self.assertEqual(result.total_errors, 0,
+                         "Found code style errors (and warnings).")
 
-    def test_pep8_Review(self):
-        """Tests pep8 style"""
-        style = pep8.StyleGuide(quiet=True)
-        p = style.check_files(['models/state.py'])
-        self.assertEqual(p.total_errors, 0, "fix pep8")
+    def test_instance(self):
+        """check if state is an instance of BaseModel"""
+        state = State()
+        self.assertIsInstance(state, State)
 
-    def test_checking_for_docstring_State(self):
-        """checking for docstrings"""
+    def test_docstrings(self):
+        """test documentation"""
         self.assertIsNotNone(State.__doc__)
 
-    def test_attributes_State(self):
-        """chekcing if State have attributes"""
-        self.assertTrue('id' in self.state.__dict__)
-        self.assertTrue('created_at' in self.state.__dict__)
-        self.assertTrue('updated_at' in self.state.__dict__)
-        self.assertTrue('name' in self.state.__dict__)
+    def test_type_state(self):
+        """Test the type of the attribute"""
+        state = State()
+        self.assertEqual(type(state.name), str)
 
-    def test_is_subclass_State(self):
-        """test if State is subclass of BaseModel"""
-        self.assertTrue(issubclass(self.state.__class__, BaseModel), True)
+    def test_hasattr(self):
+        """Test if an object has an attribute"""
+        state = State()
+        self.assertTrue(hasattr(state, "name"))
 
-    def test_attribute_types_State(self):
-        """test attribute type for State"""
-        self.assertEqual(type(self.state.name), str)
+    def test_subclass(self):
+        """test if class is subclass"""
+        self.assertEqual(issubclass(State, BaseModel), True)
 
-    @unittest.skipIf(getenv("HBNB_TYPE_STORAGE") == "db",
-                     "can't run if storage is db")
-    def test_save_State(self):
-        """test if the save works"""
-        self.state.save()
-        self.assertNotEqual(self.state.created_at, self.state.updated_at)
+    def test_normal_cases(self):
+        """normal cases"""
+        obj = State()
+        obj.name = "Runspenstinski"
+        obj.save()
+        obj_dict = obj.to_dict()
+        self.assertEqual(obj.name, "Runspenstinski")
+        self.assertEqual(obj.__class__.__name__, "State")
+        self.assertEqual(isinstance(obj.created_at, datetime), True)
+        self.assertEqual(isinstance(obj.updated_at, datetime), True)
+        self.assertEqual(type(obj_dict), dict)
 
-    def test_to_dict_State(self):
-        """test if dictionary works"""
-        self.assertEqual('to_dict' in dir(self.state), True)
+
+class test_inherit_basemodel(unittest.TestCase):
+    """Test if user inherit from BaseModel"""
+    def test_instance(self):
+        """check if Review is an instance of BaseModel"""
+        user = State()
+        self.assertIsInstance(user, State)
+        self.assertTrue(issubclass(type(user), BaseModel))
+        self.assertEqual(str(type(user)), "<class 'models.state.State'>")
+
+    """Testing State class"""
+    def test_instances(self):
+        with patch('models.state'):
+            instance = State()
+            self.assertEqual(type(instance), State)
+            instance.name = "SiliconValley"
+            expectec_attrs_types = {
+                    "id": str,
+                    "created_at": datetime,
+                    "updated_at": datetime,
+                    "name": str,
+                    }
+            inst_dict = instance.to_dict()
+            expected_dict_attrs = [
+                    "id",
+                    "created_at",
+                    "updated_at",
+                    "name",
+                    "__class__"
+                    ]
+            self.assertCountEqual(inst_dict.keys(), expected_dict_attrs)
+            self.assertEqual(inst_dict['name'], "SiliconValley")
+            self.assertEqual(inst_dict['__class__'], 'State')
+
+            for attr, types in expectec_attrs_types.items():
+                with self.subTest(attr=attr, typ=types):
+                    self.assertIn(attr, instance.__dict__)
+                    self.assertIs(type(instance.__dict__[attr]), types)
+            self.assertEqual(instance.name, "SiliconValley")
+
+    def test_State_id_and_createat(self):
+        """testing id for every user"""
+        user_1 = State()
+        sleep(2)
+        user_2 = State()
+        sleep(2)
+        user_3 = State()
+        sleep(2)
+        list_users = [user_1, user_2, user_3]
+        for instance in list_users:
+            user_id = instance.id
+            with self.subTest(user_id=user_id):
+                self.assertIs(type(user_id), str)
+        self.assertNotEqual(user_1.id, user_2.id)
+        self.assertNotEqual(user_1.id, user_3.id)
+        self.assertNotEqual(user_2.id, user_3.id)
+        self.assertTrue(user_1.created_at <= user_2.created_at)
+        self.assertTrue(user_2.created_at <= user_3.created_at)
+        self.assertNotEqual(user_1.created_at, user_2.created_at)
+        self.assertNotEqual(user_1.created_at, user_3.created_at)
+        self.assertNotEqual(user_3.created_at, user_2.created_at)
+
+    @patch('models.storage')
+    def test_save_method(self, mock_storage):
+        """Testing save method and if it update"""
+        instance5 = State()
+        created_at = instance5.created_at
+        sleep(2)
+        updated_at = instance5.updated_at
+        instance5.save()
+        new_created_at = instance5.created_at
+        sleep(2)
+        new_updated_at = instance5.updated_at
+        self.assertNotEqual(updated_at, new_updated_at)
+        self.assertEqual(created_at, new_created_at)
+        self.assertTrue(mock_storage.save.called)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
