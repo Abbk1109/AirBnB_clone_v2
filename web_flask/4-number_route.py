@@ -1,44 +1,40 @@
 #!/usr/bin/python3
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Sep  1 14:42:23 2020
-
-@author: Robinson Montes
-"""
+"""init Flask web app"""
 from flask import Flask
 app = Flask(__name__)
+app.url_map.strict_slashes = False
 
 
-@app.route('/', strict_slashes=False)
-def hello():
-    """Start a basic Flask web application"""
+@app.route('/')
+def hello_framework():
+    """ display Hello HBNB! """
     return 'Hello HBNB!'
 
 
-@app.route('/hbnb', strict_slashes=False)
-def hbnb():
-    """Adding a specific route /hbnb"""
+@app.route('/hbnb')
+def disp_hbnb():
+    """ display /hbnb! """
     return 'HBNB'
 
 
-@app.route('/c/<string:text>', strict_slashes=False)
-def c_text(text=None):
-    """Dynamic inputed text: C + replace _ for space and show text"""
-    return "C {}".format(text.replace('_', ' '))
+@app.route('/c/<text>')
+def c_is_text(text):
+    """ display /c/<text> """
+    return 'C %s' % text.replace('_', ' ')
 
 
-@app.route('/python', strict_slashes=False)
-@app.route('/python/<string:text>', strict_slashes=False)
-def python_text(text='is cool'):
-    """Dynamic inputed text: Python + replace _ for space and show text"""
-    return "Python {}".format(text.replace('_', ' '))
+@app.route("/python")
+@app.route('/python/<text>/')
+def py_text(text='is cool'):
+    """hbnb"""
+    return 'Python %s' % text.replace('_', ' ')
 
 
-@app.route('/number/<int:n>', strict_slashes=False)
-def only_digits_dynamic(n=None):
-    """Dynamic inputted integer"""
-    return "{} is a number".format(n)
+@app.route('/number/<int:n>')
+def only_integer(n):
+    """only integers"""
+    return '%d is a number' % n
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run()

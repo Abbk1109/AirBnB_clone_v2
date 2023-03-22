@@ -1,47 +1,45 @@
 #!/usr/bin/python3
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Aug 13 14:21:54 2020
-@author: Robinson Montes
-"""
-from fabric.api import local, put, run, env
+from fabric.api import *
 from datetime import datetime
-
-env.user = 'ubuntu'
-env.hosts = ['35.227.35.75', '100.24.37.33']
+import os.path
+import re
+import os
+env.hosts = ['34.74.176.42', '34.75.43.152']
 
 
 def do_pack():
-    """
-    Targginng project directory into a packages as .tgz
-    """
-    now = datetime.now().strftime("%Y%m%d%H%M%S")
-    local('sudo mkdir -p ./versions')
-    path = './versions/web_static_{}'.format(now)
-    local('sudo tar -czvf {}.tgz web_static'.format(path))
-    name = '{}.tgz'.format(path)
-    if name:
-        return name
-    else:
-        return None
+        """ Generate a tar archives """
+        date_recent = datetime.now().strftime("%Y%m%d%H%M%S")
+        path_ruth = "versions/web_static_{}.tgz".format(date_recent)
+        try:
+                local("mkdir -p versions")
+                local("tar -czvf {} web_static".format(path_ruth))
+                return path_ruth
+        except:
+                return None
 
 
 def do_deploy(archive_path):
-    """Deploy the boxing package tgz file
-    """
-    try:
-        archive = archive_path.split('/')[-1]
-        path = '/data/web_static/releases/' + archive.strip('.tgz')
-        current = '/data/web_static/current'
-        put(archive_path, '/tmp')
-        run('mkdir -p {}/'.format(path))
-        run('tar -xzf /tmp/{} -C {}'.format(archive, path))
-        run('rm /tmp/{}'.format(archive))
-        run('mv {}/web_static/* {}'.format(path, path))
-        run('rm -rf {}/web_static'.format(path))
-        run('rm -rf {}'.format(current))
-        run('ln -s {} {}'.format(path, current))
-        print('New version deployed!')
-        return True
-    except:
-        return False
+        try:
+                if not os.path.exists(archive_path):
+                        return False
+                put(archive_path, "/tmp/")
+                fileComp = archive_path.split("/")[1].split(".")[0]
+                path = "/data/web_static/releases/{}".format(fileComp)
+                tgzFile = fileComp + '.tgz'
+                print(fileComp)
+                print(path)
+                print(tgzFile)
+                
+                run("mkdir -p {}".format(path))
+                run("tar -xvzf /tmp/{}.tgz -C {}".format(fileComp, path))
+                run("sudo rm /tmp/{}.tgz".format(fileComp))
+                run("sudo rm /data/web_static/current")
+                run("sudo ln -sf /data/web_static/releases/{}\
+                /data/web_static/current".format(fileComp))
+                run("sudo mv /data/web_static/releases/{}/web_static/* \
+                /data/web_static/releases/{}/".format(fileComp, fileComp))
+                run("rm -rf /data/web_static/releases/{}/web_static".format(fileComp))
+                return True
+        except:
+                return False
