@@ -2,7 +2,7 @@
 """script that deploy archive!"""
 from fabric.api import env, local, put, run
 from datetime import datetime
-env.hosts = ['54.90.73.219', '3.84.98.183']
+env.hosts = ['107.21.40.97', '54.87.240.211']
 env.user = 'ubuntu'
 
 
